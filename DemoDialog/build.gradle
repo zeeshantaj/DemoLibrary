@@ -26,8 +26,8 @@ android {
 //        targetCompatibility JavaVersion.VERSION_1_8
 //    }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     lintOptions {
         disable 'ActivityIssueRegistry'
@@ -40,7 +40,7 @@ publishing {
             from components.findByName('release')
             groupId = 'com.github.zeeshantaj'
             artifactId = 'DemoLibrary'
-            version = '0.6.0'
+            version = '0.7.0'
         }
     }
     repositories {
@@ -57,5 +57,5 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
-    implementation 'androidx.activity:activity:1.7.0'
+    //implementation 'androidx.activity:activity:1.7.0'
 }
