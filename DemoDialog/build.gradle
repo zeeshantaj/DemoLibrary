@@ -45,8 +45,8 @@ publishing {
             //from components.release
             from components.findByName('release')
             groupId = 'com.github.zeeshantaj'
-            artifactId = 'DemoLibrary'
-            version = '0.21.0'
+            artifactId = 'DemoDialog'
+            version = '0.22.0'
         }
     }
     repositories {
