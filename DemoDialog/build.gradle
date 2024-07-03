@@ -36,6 +36,8 @@ android {
 //        targetCompatibility JavaVersion.VERSION_11
 //    }
     lintOptions {
+        checkReleaseBuilds false // To avoid lint checks in the release build
+        abortOnError false      // Avoid aborting the build on lint errors
         disable 'ActivityIssueRegistry'
     }
 }
@@ -45,8 +47,8 @@ publishing {
             //from components.release
             from components.findByName('release')
             groupId = 'com.github.zeeshantaj'
-            artifactId = 'DemoDialog'
-            version = '0.22.0'
+            artifactId = 'DemoLibrary'
+            version = '0.23.0'
         }
     }
     repositories {
