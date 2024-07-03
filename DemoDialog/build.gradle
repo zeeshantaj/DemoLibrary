@@ -34,9 +34,9 @@ android {
 //        sourceCompatibility JavaVersion.VERSION_11
 //        targetCompatibility JavaVersion.VERSION_11
 //    }
-//    lintOptions {
-//        disable 'ActivityIssueRegistry'
-//    }
+    lintOptions {
+        disable 'ActivityIssueRegistry'
+    }
 }
 publishing {
     publications {
@@ -45,7 +45,7 @@ publishing {
             from components.findByName('release')
             groupId = 'com.github.zeeshantaj'
             artifactId = 'DemoLibrary'
-            version = '0.10.0'
+            version = '0.11.0'
         }
     }
     repositories {

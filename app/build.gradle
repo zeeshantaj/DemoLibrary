@@ -35,9 +35,9 @@ android {
 //        jvmTarget = '17'
 //   }
 
-//    lintOptions {
-//        disable 'ActivityIssueRegistry'
-//    }
+    lintOptions {
+        disable 'ActivityIssueRegistry'
+    }
 }
 
 dependencies {
