@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'maven-publish'
+    id 'kotlin-android'
 }
 
 android {
@@ -45,7 +46,7 @@ publishing {
             from components.findByName('release')
             groupId = 'com.github.zeeshantaj'
             artifactId = 'DemoLibrary'
-            version = '0.16.0'
+            version = '0.17.0'
         }
     }
     repositories {
