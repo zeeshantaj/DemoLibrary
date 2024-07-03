@@ -40,7 +40,7 @@ publishing {
             from components.findByName('release')
             groupId = 'com.github.zeeshantaj'
             artifactId = 'DemoLibrary'
-            version = '0.8.0'
+            version = '0.9.0'
         }
     }
     repositories {
@@ -56,6 +56,6 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-
+    lintChecks "androidx.activity:activity-lint:1.7.0"
     //implementation 'androidx.activity:activity:1.7.0'
 }
