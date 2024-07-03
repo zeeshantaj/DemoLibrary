@@ -12,6 +12,7 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Dialog"
+//rootProject.name = "Dialog"
+rootProject.name = "DemoLibrary"
 include ':app'
 include ':DemoDialog'
