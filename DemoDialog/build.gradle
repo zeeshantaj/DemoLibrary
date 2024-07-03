@@ -40,7 +40,7 @@ publishing {
             from components.findByName('release')
             groupId = 'com.github.zeeshantaj'
             artifactId = 'DemoLibrary'
-            version = '0.5.0'
+            version = '0.6.0'
         }
     }
     repositories {
