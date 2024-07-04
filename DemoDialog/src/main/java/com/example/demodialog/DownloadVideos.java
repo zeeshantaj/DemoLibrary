@@ -5,7 +5,9 @@ import static android.content.Context.DOWNLOAD_SERVICE;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -35,58 +37,61 @@ public class DownloadVideos {
     File videoPath;
     DownloadManager.Request request1;
     DownloadManager downloadManager1;
-    ConstraintLayout downloadLayout;
-    TextView video_download, total_videos, current_videos;
+//    ConstraintLayout downloadLayout;
+//    TextView video_download, total_videos, current_videos;
     String videoType;
     private List<VideoAds> videoAdsList;
     int currentVideoIndex = 0;
     int totalVideos = 0;
     int dl_progress = 0;
     int progessValue = 0;
-
-
-//    public DownloadVideos(Context context, DbHandler dbHandler , List<VideosIdentifierListDbModel> oldVideosIdentifierListDbModels,
+    boolean videoDownloaded = true;
+    boolean downloading = true;
+    DownloadDialog downloadDialog;
+//
+//    public DownloadVideos(Activity activity,
 //                          File videoPath,
-//                          DownloadManager.Request request1,
-//                          DownloadManager downloadManager1,
 //                          ConstraintLayout downloadLayout,
 //                          TextView video_download, TextView total_videos, TextView current_videos,
-//                          String videoType,
-//                          List<VideoAds> videoAdsList) {
-//        this.dbHandler = dbHandler;
-//        this.oldVideosIdentifierListDbModels = oldVideosIdentifierListDbModels;
+//                          String videoType, List<VideoAds> videoAdsList,
+//                          DbHandler dbHandler, Context context) {
+//        this.activity = activity; // Changed to Activity context
 //        this.videoPath = videoPath;
-//        this.request1 = request1;
-//        this.downloadManager1 = downloadManager1;
 //        this.downloadLayout = downloadLayout;
 //        this.video_download = video_download;
 //        this.total_videos = total_videos;
 //        this.current_videos = current_videos;
 //        this.videoType = videoType;
 //        this.videoAdsList = videoAdsList;
+//        this.dbHandler = dbHandler;
+//        this.context = context;
 //    }
-
     public DownloadVideos(Activity activity,
                           File videoPath,
-                          ConstraintLayout downloadLayout,
-                          TextView video_download, TextView total_videos, TextView current_videos,
                           String videoType, List<VideoAds> videoAdsList,
-                          DbHandler dbHandler, Context context) {
+                          boolean downloading,DbHandler dbHandler, Context context) {
         this.activity = activity; // Changed to Activity context
         this.videoPath = videoPath;
-        this.downloadLayout = downloadLayout;
-        this.video_download = video_download;
-        this.total_videos = total_videos;
-        this.current_videos = current_videos;
         this.videoType = videoType;
         this.videoAdsList = videoAdsList;
+        this.downloading = downloading;
         this.dbHandler = dbHandler;
         this.context = context;
     }
 
 
     public void manageVideos(List<VideoAds> videoAdsList, String layoutName) {
-        downloadLayout.setVisibility(View.VISIBLE);
+        //downloadLayout.setVisibility(View.VISIBLE);
+        downloadDialog = new DownloadDialog(context);
+
+        // to get round bg of dialog
+        downloadDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        //to remove the dark bg of dialog
+        downloadDialog.getWindow().setDimAmount(0);
+        downloadDialog.show();
+
+
         if (VideoOperations.createCustomFolder(videoPath)) {
             updateVideosIdentifiers();
             currentVideoIndex = 0;
@@ -110,13 +115,18 @@ public class DownloadVideos {
     }
 
     private void downloadVideo(String videoUrl, int id, int vIndex, int totalVideos) {
-        downloadLayout.setVisibility(View.VISIBLE);
+        //downloadLayout.setVisibility(View.VISIBLE);
         String randomId = UUID.randomUUID().toString();
         dbHandler.addVideosIdentifier(randomId, 1);
 
-        total_videos.setText((vIndex + 1) + "/" + (totalVideos));
-        current_videos.setText(" Add Video " + (vIndex + 1));
-        video_download.setText("0%");
+//        total_videos.setText((vIndex + 1) + "/" + (totalVideos));
+//        current_videos.setText(" Add Video " + (vIndex + 1));
+//        video_download.setText("0%");
+
+        downloadDialog.updateTotalVideos((vIndex + 1) + "/" + totalVideos);
+        downloadDialog.updateCurrentVideos("Add Video " + (vIndex + 1));
+        downloadDialog.updateVideoDownload("0%");
+
         request1 = new DownloadManager.Request(Uri.parse(videoUrl));
         request1.setTitle("Ad Video " + vIndex);
         request1.setDescription("Downloading Video.. Please Wait");
@@ -136,8 +146,7 @@ public class DownloadVideos {
             @SuppressLint("Range")
             @Override
             public void run() {
-                boolean downloading = true;
-
+                downloading = true;
                 while (downloading) {
                     DownloadManager.Query q = new DownloadManager.Query();
                     q.setFilterById(downloadId); //filter by id which you have receieved when reqesting download from download manager
@@ -152,9 +161,12 @@ public class DownloadVideos {
                     ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(context.CONNECTIVITY_SERVICE);
                     NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
+
+                    // todo when internet is not connected the dialog dismiss
                     if (networkInfo == null || !networkInfo.isConnected()) {
                         downloading = false;
-                        //videoDownloaded = false;
+                        videoDownloaded = false;
+                        downloadDialog.dismiss();
                         break;
                     }
 
@@ -166,19 +178,22 @@ public class DownloadVideos {
                     ((Activity) context).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if (dl_progress == 0) {
-                                video_download.setText(progessValue + "%");
-                            } else {
-                                video_download.setText(dl_progress + "%");
-                            }
+                            downloadDialog.updateVideoDownload(dl_progress + "%");
+//                            if (dl_progress == 0) {
+//                                video_download.setText(progessValue + "%");
+//                            } else {
+//                                video_download.setText(dl_progress + "%");
+//                            }
 
-                            if (video_download.getText().toString().equals("100%")) {
+                            //if (video_download.getText().toString().equals("100%")) {
+                            if (dl_progress == 100) {
                                 currentVideoIndex++;
                                 if (currentVideoIndex < videoAdsList.size()) {
                                     downloadVideo(videoAdsList.get(currentVideoIndex).getVideoUrl(),
                                             videoAdsList.get(currentVideoIndex).getId(), currentVideoIndex, totalVideos);
                                 } else {
-                                    downloadLayout.setVisibility(View.GONE);
+                                    downloadDialog.dismiss();
+                                    //downloadLayout.setVisibility(View.GONE);
                                     Toast.makeText(activity, "download completed", Toast.LENGTH_SHORT).show();
                                     compareAndDeleteOldVideos();
                                     //onPostResume();
@@ -191,5 +206,42 @@ public class DownloadVideos {
             }
         }).start();
     }
-
+//    public BroadcastReceiver networkConnection = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            try {
+//                ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+//                if (connectivityManager != null) {
+//                    NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+//                    if (networkInfo != null) {
+//                        if (networkInfo.getState() == NetworkInfo.State.CONNECTED) {
+//                            AppConstants.intAv = true;
+//                            Log.d("usama lis", "onNetworkConnectionChanged 111: connected screen ");
+////                            initializeMenuSocket();
+////                            socketConnectOnInternet();
+////                            initializeSocket();
+////                            connectedShowProducts();
+//                            if (!videoDownloaded) {
+//                                videoDownloaded = true;
+//                            }
+//                        } else {
+////                            intConn.socket.close();
+//                            AppConstants.intAv = false;
+//                            downloadLayout.setVisibility(View.GONE);
+//                            Log.d("usama lis", "Internet :  not connected");
+////                            setOffLineSetup();
+//                        }
+//                    } else {
+////                        intConn.socket.close();
+//                        AppConstants.intAv = false;
+//                        downloadLayout.setVisibility(View.GONE);
+//                        Log.d("usama lis", "Internet :  not connected");
+////                        setOffLineSetup();
+//                    }
+//                }
+//            } catch (Exception ex) {
+//                ex.getMessage();
+//            }
+//        }
+//    };
 }

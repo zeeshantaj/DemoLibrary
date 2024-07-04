@@ -5,15 +5,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.demodialog.DbHandler;
 import com.example.demodialog.DownloadVideos;
@@ -32,15 +37,23 @@ public class MainActivity extends AppCompatActivity {
 
 //        overlayPermission();
 //        readWriteAllFileAccessPermission();
-        loadData();
+
+        Button startBtn = findViewById(R.id.startDownloadBtn);
+        startBtn.setOnClickListener(view -> {
+            ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+            if (networkInfo == null || !networkInfo.isConnected()) {
+                Toast.makeText(this, "internet not connected", Toast.LENGTH_SHORT).show();
+            }else {
+                loadData();
+            }
+        });
+
     }
 
     void loadData(){
         if (checkPermission()){
-            ConstraintLayout downloadLayout = findViewById(R.id.downloadLayout);
-            TextView videoDownloadTxt = findViewById(R.id.videoDownload);
-            TextView totalVideoTxt = findViewById(R.id.textView6);
-            TextView currentVideoTxt = findViewById(R.id.textView15);
 
             File videoPathToSave = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/FromLibraryDownloadedVideo/");
             String videoType = "menuBoardScreenType"; //change later
@@ -51,21 +64,27 @@ public class MainActivity extends AppCompatActivity {
             videoAdsList.add(videoAds);
 
             // coffee video
-            VideoAds videoAds1 = new VideoAds(2,"M-61","https://jumbilinresource.blob.core.windows.net/videoscreen/bs2/14/20244:06:37PM.mp4");
-            videoAdsList.add(videoAds1);
-
-            // water ads video
-            VideoAds videoAds2 = new VideoAds(3,"M-61","https://jumbilinresource.blob.core.windows.net/videoscreen/bs4/22/20247:01:06AM.mp4");
-            videoAdsList.add(videoAds2);
+//            VideoAds videoAds1 = new VideoAds(2,"M-61","https://jumbilinresource.blob.core.windows.net/videoscreen/bs2/14/20244:06:37PM.mp4");
+//            videoAdsList.add(videoAds1);
+//
+//            // water ads video
+//            VideoAds videoAds2 = new VideoAds(3,"M-61","https://jumbilinresource.blob.core.windows.net/videoscreen/bs4/22/20247:01:06AM.mp4");
+//            videoAdsList.add(videoAds2);
 
 
 
             DbHandler dbHandler = new DbHandler(this);
 
 
-            DownloadVideos downloadVideos = new DownloadVideos(this,
-                    videoPathToSave,downloadLayout,videoDownloadTxt,totalVideoTxt,currentVideoTxt,
-                    videoType,videoAdsList,dbHandler,this);
+//            DownloadVideos downloadVideos = new DownloadVideos(this,
+//                    videoPathToSave,downloadLayout,videoDownloadTxt,totalVideoTxt,currentVideoTxt,
+//                    videoType,videoAdsList,dbHandler,this);
+
+
+
+                    DownloadVideos downloadVideos = new DownloadVideos(this,
+                    videoPathToSave,
+                    videoType,videoAdsList,true,dbHandler,this);
 
 //            downloadVideos.compareAndDeleteOldVideos();
 //            downloadVideos.updateVideosIdentifiers();
