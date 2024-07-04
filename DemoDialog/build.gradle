@@ -35,11 +35,15 @@ android {
 //        sourceCompatibility JavaVersion.VERSION_11
 //        targetCompatibility JavaVersion.VERSION_11
 //    }
-    lintOptions {
-        checkReleaseBuilds false // To avoid lint checks in the release build
-        abortOnError false      // Avoid aborting the build on lint errors
-        disable 'ActivityIssueRegistry'
-    }
+
+//    lintOptions {
+//        disable 'ActivityIssueRegistry'
+//
+//        // added after this error [Fatal Error] lint-resources-release.xml:1:1: Content is not allowed in prolog.
+////        checkReleaseBuilds false // To avoid lint checks in the release build
+////        abortOnError false      // Avoid aborting the build on lint errors
+//
+//    }
 }
 publishing {
     publications {
