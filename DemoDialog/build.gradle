@@ -50,6 +50,7 @@ android {
     lintOptions {
         checkReleaseBuilds false // Disable lint checks for release build
         abortOnError false      // Avoid aborting the build on lint errors
+        xmlOutput file("${buildDir}/reports/lint/lint-result.xml")
     }
 }
 publishing {
