@@ -1,6 +1,6 @@
 plugins {
     id 'com.android.library'
-    id 'maven-publish'
+   // id 'maven-publish'
     id 'kotlin-android'
 }
 
@@ -44,32 +44,32 @@ android {
 ////        abortOnError false      // Avoid aborting the build on lint errors
 //
 //    }
-    packagingOptions {
-        exclude 'lint-resources-release.xml'
-    }
-    lintOptions {
-        checkReleaseBuilds false // Disable lint checks for release build
-        abortOnError false      // Avoid aborting the build on lint errors
-        xmlOutput file("${buildDir}/reports/lint/lint-result.xml")
-    }
+//    packagingOptions {
+//        exclude 'lint-resources-release.xml'
+//    }
+//    lintOptions {
+//        checkReleaseBuilds false // Disable lint checks for release build
+//        abortOnError false      // Avoid aborting the build on lint errors
+//        xmlOutput file("${buildDir}/reports/lint/lint-result.xml")
+//    }
 }
-publishing {
-    publications {
-        release(MavenPublication) {
-            //from components.release
-            from components.findByName('release')
-            groupId = 'com.github.zeeshantaj'
-            artifactId = 'DemoLibrary'
-            version = '0.28.0'
-        }
-    }
-    repositories {
-        maven {
-            name = "DemoLibrary"
-            url = uri("https://maven.pkg.github.com/zeeshantaj/DemoLibrary")
-        }
-    }
-}
+//publishing {
+//    publications {
+//        release(MavenPublication) {
+//            //from components.release
+//            from components.findByName('release')
+//            groupId = 'com.github.zeeshantaj'
+//            artifactId = 'DemoLibrary'
+//            version = '0.28.0'
+//        }
+//    }
+//    repositories {
+//        maven {
+//            name = "DemoLibrary"
+//            url = uri("https://maven.pkg.github.com/zeeshantaj/DemoLibrary")
+//        }
+//    }
+//}
 dependencies {
 
     implementation 'com.google.android.material:material:1.6.1'
