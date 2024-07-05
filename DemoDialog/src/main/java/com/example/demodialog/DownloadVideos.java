@@ -63,9 +63,9 @@ public class DownloadVideos {
     }
 
 
-    public void manageVideos(List<VideoAds> videoAdsList, String layoutName) {
+    public void manageVideos(List<VideoAds> videoAdsList, String layoutName,int SCREEN_TYPE) {
         //downloadLayout.setVisibility(View.VISIBLE);
-        downloadDialog = new DownloadDialog(activity);
+        downloadDialog = new DownloadDialog(activity,SCREEN_TYPE);
 
         // to get round bg of dialog
         downloadDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);

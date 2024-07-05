@@ -54,8 +54,8 @@ public class MainActivity extends AppCompatActivity {
             List<VideoAds> videoAdsList = new ArrayList<>();
 
             // food video
-//            VideoAds videoAds = new VideoAds(1, "M-61", "https://jumbilinresource.blob.core.windows.net/videoscreen/bs4/16/20247:13:27PM.mp4");
-//            videoAdsList.add(videoAds);
+            VideoAds videoAds = new VideoAds(1, "M-61", "https://jumbilinresource.blob.core.windows.net/videoscreen/bs4/16/20247:13:27PM.mp4");
+            videoAdsList.add(videoAds);
 //
 //         //    coffee video
 //            VideoAds videoAds1 = new VideoAds(2, "M-61", "https://jumbilinresource.blob.core.windows.net/videoscreen/bs2/14/20244:06:37PM.mp4");
@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
 
 
             if (videoAdsList.size() > 0) {
-                downloadVideos.manageVideos(videoAdsList, "");
+                downloadVideos.manageVideos(videoAdsList, "",2);
             } else {
                 Log.d("MyApp", "video size less than 0");
                 downloadVideos.updateVideosIdentifiers();

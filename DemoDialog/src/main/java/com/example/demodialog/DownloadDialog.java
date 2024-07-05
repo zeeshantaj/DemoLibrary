@@ -16,10 +16,24 @@ public class DownloadDialog extends Dialog {
     private TextView videoDownload;
     private TextView totalVideos;
     private TextView currentVideos;
-
-    public DownloadDialog(@NonNull Context context) {
+    private int SCREEN_TYPE;
+    public DownloadDialog(@NonNull Context context,int SCREEN_TYPE) {
         super(context);
-        setContentView(R.layout.download_dialog); // Replace with your actual layout
+        this.SCREEN_TYPE = SCREEN_TYPE;
+        if (SCREEN_TYPE == 1){
+            setContentView(R.layout.download_dialog);
+            Window window = getWindow();
+            if (window != null) {
+                WindowManager.LayoutParams params = window.getAttributes();
+                params.gravity = Gravity.TOP | Gravity.RIGHT;
+                params.x = 0; // Adjust these values as needed
+                params.y = 0; // Adjust these values as needed
+                window.setAttributes(params);
+            }
+        }else if (SCREEN_TYPE == 2){
+            setContentView(R.layout.config_download_dialog);
+        }
+
 
         videoDownload = findViewById(R.id.videoDownload);
         totalVideos = findViewById(R.id.textView6);
@@ -28,14 +42,7 @@ public class DownloadDialog extends Dialog {
         // disable dialog outside touch
         setCanceledOnTouchOutside(false);
 
-        Window window = getWindow();
-        if (window != null) {
-            WindowManager.LayoutParams params = window.getAttributes();
-            params.gravity = Gravity.TOP | Gravity.RIGHT;
-            params.x = 0; // Adjust these values as needed
-            params.y = 0; // Adjust these values as needed
-            window.setAttributes(params);
-        }
+
     }
 
     public void updateVideoDownload(String text) {
