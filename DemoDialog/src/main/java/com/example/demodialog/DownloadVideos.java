@@ -23,6 +23,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.ConsoleHandler;
@@ -31,14 +32,11 @@ import java.util.logging.Handler;
 public class DownloadVideos {
 
     Activity activity;
-    Context context;
     DbHandler dbHandler;
     List<VideosIdentifierListDbModel> oldVideosIdentifierListDbModels;
     File videoPath;
     DownloadManager.Request request1;
     DownloadManager downloadManager1;
-//    ConstraintLayout downloadLayout;
-//    TextView video_download, total_videos, current_videos;
     String videoType;
     private List<VideoAds> videoAdsList;
     int currentVideoIndex = 0;
@@ -52,22 +50,22 @@ public class DownloadVideos {
 
     public DownloadVideos(Activity activity,
                           File videoPath,
-                          String videoType, List<VideoAds> videoAdsList,
-                          boolean downloading,DbHandler dbHandler, Context context,DownloadCallback downloadCallback) {
+                          List<VideoAds> videoAdsList,
+                          String videoType,
+                          boolean downloading,DownloadCallback downloadCallback) {
         this.activity = activity; // Changed to Activity context
         this.videoPath = videoPath;
-        this.videoType = videoType;
         this.videoAdsList = videoAdsList;
+        this.videoType = videoType;
         this.downloading = downloading;
-        this.dbHandler = dbHandler;
-        this.context = context;
         this.downloadCallback = downloadCallback;
+        dbHandler = new DbHandler(activity);
     }
 
 
     public void manageVideos(List<VideoAds> videoAdsList, String layoutName) {
         //downloadLayout.setVisibility(View.VISIBLE);
-        downloadDialog = new DownloadDialog(context);
+        downloadDialog = new DownloadDialog(activity);
 
         // to get round bg of dialog
         downloadDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
@@ -82,7 +80,7 @@ public class DownloadVideos {
             totalVideos = videoAdsList.size();
             downloadVideo(videoAdsList.get(0).getVideoUrl(), videoAdsList.get(0).getId(), currentVideoIndex, totalVideos);
         } else {
-            UIHelper.showErrorDialog(context, "Folder creation failed", "Check for storage permissions", 1);
+            UIHelper.showErrorDialog(activity, "Folder creation failed", "Check for storage permissions", 1);
         }
 
 
@@ -120,7 +118,7 @@ public class DownloadVideos {
         request1.setDestinationUri(Uri.fromFile(file));
 
         //***************************************new work for android 10 & Above*******************************************************
-        downloadManager1 = (DownloadManager) context.getSystemService(DOWNLOAD_SERVICE);
+        downloadManager1 = (DownloadManager) activity.getSystemService(DOWNLOAD_SERVICE);
         final long downloadId = downloadManager1.enqueue(request1);
 
         new Thread(new Runnable() {
@@ -140,7 +138,7 @@ public class DownloadVideos {
                         downloading = false;
                     }
 
-                    ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(context.CONNECTIVITY_SERVICE);
+                    ConnectivityManager connectivityManager = (ConnectivityManager) activity.getSystemService(activity.CONNECTIVITY_SERVICE);
                     NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
 
@@ -166,7 +164,7 @@ public class DownloadVideos {
                         progessValue = dl_progress;
                     }
 
-                    ((Activity) context).runOnUiThread(new Runnable() {
+                    activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             downloadDialog.updateVideoDownload(dl_progress + "%");
