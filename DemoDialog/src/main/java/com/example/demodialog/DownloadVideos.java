@@ -48,28 +48,12 @@ public class DownloadVideos {
     boolean videoDownloaded = true;
     boolean downloading = true;
     DownloadDialog downloadDialog;
-//
-//    public DownloadVideos(Activity activity,
-//                          File videoPath,
-//                          ConstraintLayout downloadLayout,
-//                          TextView video_download, TextView total_videos, TextView current_videos,
-//                          String videoType, List<VideoAds> videoAdsList,
-//                          DbHandler dbHandler, Context context) {
-//        this.activity = activity; // Changed to Activity context
-//        this.videoPath = videoPath;
-//        this.downloadLayout = downloadLayout;
-//        this.video_download = video_download;
-//        this.total_videos = total_videos;
-//        this.current_videos = current_videos;
-//        this.videoType = videoType;
-//        this.videoAdsList = videoAdsList;
-//        this.dbHandler = dbHandler;
-//        this.context = context;
-//    }
+    DownloadCallback downloadCallback;
+
     public DownloadVideos(Activity activity,
                           File videoPath,
                           String videoType, List<VideoAds> videoAdsList,
-                          boolean downloading,DbHandler dbHandler, Context context) {
+                          boolean downloading,DbHandler dbHandler, Context context,DownloadCallback downloadCallback) {
         this.activity = activity; // Changed to Activity context
         this.videoPath = videoPath;
         this.videoType = videoType;
@@ -77,6 +61,7 @@ public class DownloadVideos {
         this.downloading = downloading;
         this.dbHandler = dbHandler;
         this.context = context;
+        this.downloadCallback = downloadCallback;
     }
 
 
@@ -90,7 +75,6 @@ public class DownloadVideos {
         //to remove the dark bg of dialog
         downloadDialog.getWindow().setDimAmount(0);
         downloadDialog.show();
-
 
         if (VideoOperations.createCustomFolder(videoPath)) {
             updateVideosIdentifiers();
@@ -115,13 +99,10 @@ public class DownloadVideos {
     }
 
     private void downloadVideo(String videoUrl, int id, int vIndex, int totalVideos) {
-        //downloadLayout.setVisibility(View.VISIBLE);
+
         String randomId = UUID.randomUUID().toString();
         dbHandler.addVideosIdentifier(randomId, 1);
 
-//        total_videos.setText((vIndex + 1) + "/" + (totalVideos));
-//        current_videos.setText(" Add Video " + (vIndex + 1));
-//        video_download.setText("0%");
 
         downloadDialog.updateTotalVideos((vIndex + 1) + "/" + totalVideos);
         downloadDialog.updateCurrentVideos("Add Video " + (vIndex + 1));
@@ -155,6 +136,7 @@ public class DownloadVideos {
                     int bytes_downloaded = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
                     int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
                     if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
+
                         downloading = false;
                     }
 
@@ -166,7 +148,16 @@ public class DownloadVideos {
                     if (networkInfo == null || !networkInfo.isConnected()) {
                         downloading = false;
                         videoDownloaded = false;
-                        downloadDialog.dismiss();
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                downloadDialog.dismiss();
+                             //   Toast.makeText(activity, "No internet connection. Download canceled.", Toast.LENGTH_SHORT).show();
+                                if (downloadCallback != null) {
+                                    downloadCallback.onFailure("No internet connection.");
+                                }
+                            }
+                        });
                         break;
                     }
 
@@ -192,11 +183,9 @@ public class DownloadVideos {
                                     downloadVideo(videoAdsList.get(currentVideoIndex).getVideoUrl(),
                                             videoAdsList.get(currentVideoIndex).getId(), currentVideoIndex, totalVideos);
                                 } else {
-                                    downloadDialog.dismiss();
-                                    //downloadLayout.setVisibility(View.GONE);
-                                    Toast.makeText(activity, "download completed", Toast.LENGTH_SHORT).show();
                                     compareAndDeleteOldVideos();
-                                    //onPostResume();
+                                    downloadDialog.dismiss();
+                                    downloadCallback.onSuccess();
                                 }
                             }
                         }
