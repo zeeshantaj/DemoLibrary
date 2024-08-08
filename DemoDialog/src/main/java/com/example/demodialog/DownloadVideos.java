@@ -12,6 +12,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
@@ -26,6 +27,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.LongFunction;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 
@@ -47,6 +49,7 @@ public class DownloadVideos {
     boolean downloading = true;
     DownloadDialog downloadDialog;
     DownloadCallback downloadCallback;
+    double downloadedMB;
 
     public DownloadVideos(Activity activity,
                           File videoPath,
@@ -62,16 +65,18 @@ public class DownloadVideos {
         dbHandler = new DbHandler(activity);
     }
 
-
     public void manageVideos(List<VideoAds> videoAdsList, String layoutName,int SCREEN_TYPE) {
-        //downloadLayout.setVisibility(View.VISIBLE);
+        // SCREEN_TYPE = 1 is for main screen dialog
+        // SCREEN_TYPE = 2 is for config screen dialog
         downloadDialog = new DownloadDialog(activity,SCREEN_TYPE);
 
         // to get round bg of dialog
         downloadDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
-        //to remove the dark bg of dialog
-        downloadDialog.getWindow().setDimAmount(0);
+        if (SCREEN_TYPE == 1){
+            //to remove the dark bg of dialog
+            downloadDialog.getWindow().setDimAmount(0);
+        }
         downloadDialog.show();
 
         if (VideoOperations.createCustomFolder(videoPath)) {
@@ -126,6 +131,10 @@ public class DownloadVideos {
             @Override
             public void run() {
                 downloading = true;
+                long previousBytesDownloaded = -1;
+                long lastProgressTime = System.currentTimeMillis();
+                long TIMEOUT = 10000; // 30 seconds
+                long lastProgressUpdateTime = 0;
                 while (downloading) {
                     DownloadManager.Query q = new DownloadManager.Query();
                     q.setFilterById(downloadId); //filter by id which you have receieved when reqesting download from download manager
@@ -134,8 +143,57 @@ public class DownloadVideos {
                     int bytes_downloaded = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
                     int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
                     if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
-
+                        Log.d("MyApp","download complete ");
                         downloading = false;
+                    }
+
+
+                    int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                    if (status == DownloadManager.STATUS_RUNNING){
+                        long fileSizeBytes = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+                        long downloadedBytes = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+
+                        if (fileSizeBytes > 0) {
+//                            // Convert bytes to megabytes
+                            double fileSizeMB = (double) fileSizeBytes / (1024 * 1024);
+                            downloadedMB = (double) downloadedBytes / (1024 * 1024);
+                            String fileSizeText = String.format("%.2f MB / %.2f MB ", downloadedMB, fileSizeMB);
+                            lastProgressUpdateTime = System.currentTimeMillis();
+
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // Update the UI with the downloaded size and total size in MB
+                                    downloadDialog.showFileSize(fileSizeText);
+
+                                }
+                            });
+
+                        }
+                    }
+//
+//                    long currentTime = System.currentTimeMillis();
+//                    if (currentTime - lastProgressUpdateTime >= TIMEOUT) {
+//                        Log.d("MyApp","downloading stuck ");
+//                    }
+//
+//                    Log.d("MyApp","lastProgressUpdateTime "+lastProgressUpdateTime);
+//                    Log.d("MyApp","current time "+currentTime);
+//                    Log.d("MyApp","timeout "+TIMEOUT);
+//                    long result = currentTime - lastProgressTime;
+//                    Log.d("MyApp","current - lastprogress "+result);
+
+                    if (status == DownloadManager.STATUS_PAUSED){
+                        downloading = false;
+                        downloadDialog.dismiss();
+                        Log.d("MyApp","downloading paused ");
+                        break;
+                    }
+                    if (status == DownloadManager.STATUS_FAILED){
+                        downloading = false;
+                        downloadDialog.dismiss();
+                        Log.d("MyApp","downloading failed ");
+                        break;
                     }
 
                     ConnectivityManager connectivityManager = (ConnectivityManager) activity.getSystemService(activity.CONNECTIVITY_SERVICE);
@@ -150,7 +208,6 @@ public class DownloadVideos {
                             @Override
                             public void run() {
                                 downloadDialog.dismiss();
-                             //   Toast.makeText(activity, "No internet connection. Download canceled.", Toast.LENGTH_SHORT).show();
                                 if (downloadCallback != null) {
                                     downloadCallback.onFailure("No internet connection.");
                                 }
@@ -168,14 +225,10 @@ public class DownloadVideos {
                         @Override
                         public void run() {
                             downloadDialog.updateVideoDownload(dl_progress + "%");
-//                            if (dl_progress == 0) {
-//                                video_download.setText(progessValue + "%");
-//                            } else {
-//                                video_download.setText(dl_progress + "%");
-//                            }
 
                             //if (video_download.getText().toString().equals("100%")) {
                             if (dl_progress == 100) {
+                                downloadedMB = 0.00;
                                 currentVideoIndex++;
                                 if (currentVideoIndex < videoAdsList.size()) {
                                     downloadVideo(videoAdsList.get(currentVideoIndex).getVideoUrl(),
@@ -193,42 +246,5 @@ public class DownloadVideos {
             }
         }).start();
     }
-//    public BroadcastReceiver networkConnection = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            try {
-//                ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-//                if (connectivityManager != null) {
-//                    NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-//                    if (networkInfo != null) {
-//                        if (networkInfo.getState() == NetworkInfo.State.CONNECTED) {
-//                            AppConstants.intAv = true;
-//                            Log.d("usama lis", "onNetworkConnectionChanged 111: connected screen ");
-////                            initializeMenuSocket();
-////                            socketConnectOnInternet();
-////                            initializeSocket();
-////                            connectedShowProducts();
-//                            if (!videoDownloaded) {
-//                                videoDownloaded = true;
-//                            }
-//                        } else {
-////                            intConn.socket.close();
-//                            AppConstants.intAv = false;
-//                            downloadLayout.setVisibility(View.GONE);
-//                            Log.d("usama lis", "Internet :  not connected");
-////                            setOffLineSetup();
-//                        }
-//                    } else {
-////                        intConn.socket.close();
-//                        AppConstants.intAv = false;
-//                        downloadLayout.setVisibility(View.GONE);
-//                        Log.d("usama lis", "Internet :  not connected");
-////                        setOffLineSetup();
-//                    }
-//                }
-//            } catch (Exception ex) {
-//                ex.getMessage();
-//            }
-//        }
-//    };
+
 }

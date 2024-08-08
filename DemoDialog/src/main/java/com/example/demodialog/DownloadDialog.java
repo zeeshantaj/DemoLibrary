@@ -16,6 +16,7 @@ public class DownloadDialog extends Dialog {
     private TextView videoDownload;
     private TextView totalVideos;
     private TextView currentVideos;
+    private TextView fileSize;
     private int SCREEN_TYPE;
     public DownloadDialog(@NonNull Context context,int SCREEN_TYPE) {
         super(context);
@@ -38,6 +39,7 @@ public class DownloadDialog extends Dialog {
         videoDownload = findViewById(R.id.videoDownload);
         totalVideos = findViewById(R.id.textView6);
         currentVideos = findViewById(R.id.textView15);
+        fileSize = findViewById(R.id.fileSizeTxt);
 
         // disable dialog outside touch
         setCanceledOnTouchOutside(false);
@@ -56,4 +58,6 @@ public class DownloadDialog extends Dialog {
     public void updateCurrentVideos(String text) {
         currentVideos.setText(text);
     }
+
+    public void showFileSize(String text) {fileSize.setText(text);}
 }

@@ -12,10 +12,13 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.TrafficStats;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Button;
@@ -34,7 +37,10 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION = 502;
-
+    private long previousRxBytes = 0;
+    private long previousTimeStamp = 0;
+    private final Handler handler = new Handler();
+    private TextView internetSpeedTextView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,10 +48,60 @@ public class MainActivity extends AppCompatActivity {
 
         Button startBtn = findViewById(R.id.startDownloadBtn);
         startBtn.setOnClickListener(view -> {
+            loadData();
         });
-
+        internetSpeedTextView = findViewById(R.id.speedTxt);
+        startUpdatingInternetSpeed();
     }
 
+    public String getInternetSpeed() {
+        long currentRxBytes = TrafficStats.getTotalRxBytes();
+        long currentTimeStamp = System.currentTimeMillis();
+
+        if (previousRxBytes == 0) {
+            previousRxBytes = currentRxBytes;
+            previousTimeStamp = currentTimeStamp;
+            return "Calculating...";
+        }
+
+        long dataConsumed = currentRxBytes - previousRxBytes;
+        long timeInterval = currentTimeStamp - previousTimeStamp;
+
+        if (timeInterval == 0) {
+            return "Calculating...";
+        }
+
+        long speed = (dataConsumed * 1000) / timeInterval; // Speed in bytes per second
+
+        previousRxBytes = currentRxBytes;
+        previousTimeStamp = currentTimeStamp;
+
+        if (speed >= 1024 * 1024) {
+            return String.format("%.2f MB/s", (float) speed / (1024 * 1024));
+        } else if (speed >= 1024) {
+            return String.format("%.2f KB/s", (float) speed / 1024);
+        } else {
+            return speed + " B/s";
+        }
+    }
+    private void startUpdatingInternetSpeed() {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                String speed = getInternetSpeed();
+                internetSpeedTextView.setText("internet speed: "+speed);
+//                internetSpeedTextView.setText("internet speed: "+String.valueOf(getWifiLevel()));
+
+
+                handler.postDelayed(this, 1000); // Update every second
+            }
+        }, 1000);
+    }
+//        public int getWifiLevel() {
+//        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+//        int linkSpeed = wifiManager.getConnectionInfo().getRssi();
+//        return WifiManager.calculateSignalLevel(linkSpeed, 5);
+//    }
     void loadData() {
         if (checkPermission()) {
 
@@ -69,6 +125,9 @@ public class MainActivity extends AppCompatActivity {
 //            VideoAds videoAds3 = new VideoAds(4, "M-61", "https://jumbilinresource.blob.core.windows.net/videoscreen/bs6/17/20244:57:20PM.mp4");
 //            videoAdsList.add(videoAds3);
 
+            VideoAds videoAds3 = new VideoAds(4, "M-61", "https://jumbilinresource.blob.core.windows.net/videoscreen/bs8/5/20243:36:45PM.mp4");
+            videoAdsList.add(videoAds3);
+
 
             DownloadVideos downloadVideos = new DownloadVideos(this,
                     videoPathToSave,videoAdsList, videoType, true, new DownloadCallback() {
@@ -88,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
                 downloadVideos.manageVideos(videoAdsList, "",2);
             } else {
                 Log.d("MyApp", "video size less than 0");
-                downloadVideos.updateVideosIdentifiers();
+
                 downloadVideos.compareAndDeleteOldVideos();
 
             }
