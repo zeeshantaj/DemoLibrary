@@ -12,7 +12,7 @@ public class Application extends android.app.Application {
     public void onCreate() {
         super.onCreate();
         WebConst webConst = new WebConst();
-        webConst.checkForDevelopmentUrls();
+//        webConst.checkForDevelopmentUrls();
 
         Log.d("MyApp","application class onCreate");
         // Register the lifecycle observer
