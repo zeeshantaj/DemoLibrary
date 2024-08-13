@@ -82,8 +82,6 @@
             app:layout_constraintBottom_toBottomOf="@+id/textView32"
             app:layout_constraintStart_toEndOf="@+id/textView32"
             app:layout_constraintTop_toTopOf="@+id/textView32" />
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.appcompat.widget.SwitchCompat
