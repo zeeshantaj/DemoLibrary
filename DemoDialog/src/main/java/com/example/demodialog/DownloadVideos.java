@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.TrafficStats;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Looper;
@@ -46,10 +47,11 @@ public class DownloadVideos {
     int dl_progress = 0;
     int progessValue = 0;
     boolean videoDownloaded = true;
-    boolean downloading = true;
+    boolean downloading;
     DownloadDialog downloadDialog;
     DownloadCallback downloadCallback;
     double downloadedMB;
+    double fileSizeMB;
 
     public DownloadVideos(Activity activity,
                           File videoPath,
@@ -87,8 +89,6 @@ public class DownloadVideos {
         } else {
             UIHelper.showErrorDialog(activity, "Folder creation failed", "Check for storage permissions", 1);
         }
-
-
     }
 
     public void updateVideosIdentifiers() {
@@ -111,12 +111,14 @@ public class DownloadVideos {
         downloadDialog.updateCurrentVideos("Add Video " + (vIndex + 1));
         downloadDialog.updateVideoDownload("0%");
 
+
         request1 = new DownloadManager.Request(Uri.parse(videoUrl));
         request1.setTitle("Ad Video " + vIndex);
         request1.setDescription("Downloading Video.. Please Wait");
         String cookie1 = CookieManager.getInstance().getCookie(videoUrl);
         request1.addRequestHeader("cookie1", cookie1);
         request1.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+
         //***************************************new work for android 10 & Above*******************************************************
         String fileName = randomId + videoType + " " + ".mp4";
         File file = new File(videoPath, fileName);
@@ -131,10 +133,7 @@ public class DownloadVideos {
             @Override
             public void run() {
                 downloading = true;
-                long previousBytesDownloaded = -1;
-                long lastProgressTime = System.currentTimeMillis();
-                long TIMEOUT = 10000; // 30 seconds
-                long lastProgressUpdateTime = 0;
+
                 while (downloading) {
                     DownloadManager.Query q = new DownloadManager.Query();
                     q.setFilterById(downloadId); //filter by id which you have receieved when reqesting download from download manager
@@ -155,10 +154,10 @@ public class DownloadVideos {
 
                         if (fileSizeBytes > 0) {
 //                            // Convert bytes to megabytes
-                            double fileSizeMB = (double) fileSizeBytes / (1024 * 1024);
+                            fileSizeMB = (double) fileSizeBytes / (1024 * 1024);
                             downloadedMB = (double) downloadedBytes / (1024 * 1024);
                             String fileSizeText = String.format("%.2f MB / %.2f MB ", downloadedMB, fileSizeMB);
-                            lastProgressUpdateTime = System.currentTimeMillis();
+
 
                             activity.runOnUiThread(new Runnable() {
                                 @Override
@@ -168,27 +167,18 @@ public class DownloadVideos {
 
                                 }
                             });
-
                         }
                     }
-//
-//                    long currentTime = System.currentTimeMillis();
-//                    if (currentTime - lastProgressUpdateTime >= TIMEOUT) {
-//                        Log.d("MyApp","downloading stuck ");
-//                    }
-//
-//                    Log.d("MyApp","lastProgressUpdateTime "+lastProgressUpdateTime);
-//                    Log.d("MyApp","current time "+currentTime);
-//                    Log.d("MyApp","timeout "+TIMEOUT);
-//                    long result = currentTime - lastProgressTime;
-//                    Log.d("MyApp","current - lastprogress "+result);
 
+                    //when video paused dismiss the dialog
                     if (status == DownloadManager.STATUS_PAUSED){
                         downloading = false;
                         downloadDialog.dismiss();
                         Log.d("MyApp","downloading paused ");
                         break;
                     }
+
+                    // when video failed dismiss the dialog
                     if (status == DownloadManager.STATUS_FAILED){
                         downloading = false;
                         downloadDialog.dismiss();
@@ -200,7 +190,7 @@ public class DownloadVideos {
                     NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
 
-                    // todo when internet is not connected the dialog dismiss
+                    //  when internet is not connected the dialog dismiss
                     if (networkInfo == null || !networkInfo.isConnected()) {
                         downloading = false;
                         videoDownloaded = false;
@@ -228,7 +218,6 @@ public class DownloadVideos {
 
                             //if (video_download.getText().toString().equals("100%")) {
                             if (dl_progress == 100) {
-                                downloadedMB = 0.00;
                                 currentVideoIndex++;
                                 if (currentVideoIndex < videoAdsList.size()) {
                                     downloadVideo(videoAdsList.get(currentVideoIndex).getVideoUrl(),
@@ -246,5 +235,4 @@ public class DownloadVideos {
             }
         }).start();
     }
-
 }

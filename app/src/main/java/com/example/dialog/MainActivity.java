@@ -2,19 +2,23 @@ package com.example.dialog;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.TrafficStats;
 import android.net.Uri;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -22,11 +26,10 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-import com.example.demodialog.DbHandler;
 import com.example.demodialog.DownloadCallback;
 import com.example.demodialog.DownloadVideos;
 import com.example.demodialog.VideoAds;
@@ -34,26 +37,78 @@ import com.example.demodialog.VideoAds;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
+import com.example.dialog.BuildConfig;
 public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION = 502;
     private long previousRxBytes = 0;
     private long previousTimeStamp = 0;
     private final Handler handler = new Handler();
     private TextView internetSpeedTextView;
+    private final int REQUEST_CODE_FOREGROUND_SERVICE = 101;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //String RegisterUrlNew = "";
+
+//        String register = BuildConfig.BASE_URL;
+
+        SwitchCompat switchCompat = findViewById(R.id.relaunchSwitch);
+
+        SharedPreferences sharedPreferences = getSharedPreferences("relaunchState", Context.MODE_PRIVATE);
+        boolean isChecked = sharedPreferences.getBoolean("isRelaunch", false);
+        switchCompat.setChecked(isChecked);
+        switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b){
+                    Toast.makeText(MainActivity.this, "Relaunch enabled ", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(MainActivity.this, "Relaunch disabled ", Toast.LENGTH_SHORT).show();
+                }
+                SharedPreferences sharedPreferences1 = getSharedPreferences("relaunchState", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences1.edit();
+                editor.putBoolean("isRelaunch", b);
+                editor.apply();
+            }
+        });
 
         Button startBtn = findViewById(R.id.startDownloadBtn);
         startBtn.setOnClickListener(view -> {
             loadData();
         });
+        WebConst webConst = new WebConst();
+        String url = webConst.BASE_URL;
         internetSpeedTextView = findViewById(R.id.speedTxt);
         startUpdatingInternetSpeed();
-    }
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE) != PackageManager.PERMISSION_GRANTED) {
+//                    if (Build.VERSION.SDK_INT >= 34) {
+//                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK}, REQUEST_CODE_FOREGROUND_SERVICE);
+//                    }
+                    requestOverlayPermission();
+
+                }
+
+            }
+            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+                if (!Settings.canDrawOverlays(this)) {
+                    // Permission is not granted
+                    requestOverlayPermission();
+                }
+            }
+
+
+    }
+    private void requestOverlayPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            startActivityForResult(intent, REQUEST_CODE_FOREGROUND_SERVICE);
+        }
+    }
     public String getInternetSpeed() {
         long currentRxBytes = TrafficStats.getTotalRxBytes();
         long currentTimeStamp = System.currentTimeMillis();
@@ -84,24 +139,18 @@ public class MainActivity extends AppCompatActivity {
             return speed + " B/s";
         }
     }
+
     private void startUpdatingInternetSpeed() {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 String speed = getInternetSpeed();
                 internetSpeedTextView.setText("internet speed: "+speed);
-//                internetSpeedTextView.setText("internet speed: "+String.valueOf(getWifiLevel()));
-
-
                 handler.postDelayed(this, 1000); // Update every second
             }
         }, 1000);
     }
-//        public int getWifiLevel() {
-//        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-//        int linkSpeed = wifiManager.getConnectionInfo().getRssi();
-//        return WifiManager.calculateSignalLevel(linkSpeed, 5);
-//    }
+
     void loadData() {
         if (checkPermission()) {
 
@@ -109,10 +158,8 @@ public class MainActivity extends AppCompatActivity {
             String videoType = "menuBoardScreenType"; //change later
             List<VideoAds> videoAdsList = new ArrayList<>();
 
-            // food video
-            VideoAds videoAds = new VideoAds(1, "M-61", "https://jumbilinresource.blob.core.windows.net/videoscreen/bs4/16/20247:13:27PM.mp4");
-            videoAdsList.add(videoAds);
 //
+
 //         //    coffee video
 //            VideoAds videoAds1 = new VideoAds(2, "M-61", "https://jumbilinresource.blob.core.windows.net/videoscreen/bs2/14/20244:06:37PM.mp4");
 //            videoAdsList.add(videoAds1);
@@ -124,9 +171,9 @@ public class MainActivity extends AppCompatActivity {
 //            //side bakery video
 //            VideoAds videoAds3 = new VideoAds(4, "M-61", "https://jumbilinresource.blob.core.windows.net/videoscreen/bs6/17/20244:57:20PM.mp4");
 //            videoAdsList.add(videoAds3);
-
-            VideoAds videoAds3 = new VideoAds(4, "M-61", "https://jumbilinresource.blob.core.windows.net/videoscreen/bs8/5/20243:36:45PM.mp4");
-            videoAdsList.add(videoAds3);
+//
+//            videoAdsList.add(new VideoAds(5, "M-61", "https://jumbilinresource.blob.core.windows.net/videoscreen/bs8/5/20243:36:45PM.mp4"));
+//            videoAdsList.add(new VideoAds(1, "M-61", "https://jumbilinresource.blob.core.windows.net/videoscreen/bs4/16/20247:13:27PM.mp4"));
 
 
             DownloadVideos downloadVideos = new DownloadVideos(this,
@@ -148,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 Log.d("MyApp", "video size less than 0");
 
-                downloadVideos.compareAndDeleteOldVideos();
+//                downloadVideos.compareAndDeleteOldVideos();
 
             }
 
@@ -165,22 +212,14 @@ public class MainActivity extends AppCompatActivity {
                     NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
                     if (networkInfo != null) {
                         if (networkInfo.getState() == NetworkInfo.State.CONNECTED) {
-
-                            Log.d("usama lis", "Internet :  connected connected");
-
-
-                            // internet connected call download
-                            loadData();
-//                            initializeSocket();
+                            Log.d("MyApp", "Internet :  connected connected");
+                            //loadData();
 
                         } else {
-
-                            Log.d("usama lis", "Internet :  not connected");
-                            //  setOffLineSetup();
+                            Log.d("MyApp", "Internet :  not connected");
                         }
                     } else {
-
-                        Log.d("usama lis", "Internet :  not connected");
+                        Log.d("MyApp", "Internet :  not connected");
                     }
                 }
             } catch (Exception ex) {
@@ -188,7 +227,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-
 
     @Override
     protected void onResume() {
@@ -204,12 +242,40 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    private boolean checkWriteExternalStoragePermission() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13 (API level 33) or later
+                if (checkSelfPermission(Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.READ_MEDIA_IMAGES}, REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION);
+                    return false;
+                }
+            } else {
+                if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            loadData();
+         //   loadData();
         } else {
             finish();
         }
+        if (requestCode == REQUEST_CODE_FOREGROUND_SERVICE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (Settings.canDrawOverlays(this)) {
+                    // Permission granted, proceed with your logic
+                    Toast.makeText(this, "Overlay permission granted", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Overlay permission not granted", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
+
 }
