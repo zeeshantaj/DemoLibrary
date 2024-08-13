@@ -25,8 +25,11 @@ import android.os.Environment;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
     private final Handler handler = new Handler();
     private TextView internetSpeedTextView;
     private final int REQUEST_CODE_FOREGROUND_SERVICE = 101;
+    private Spinner spinner;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,9 +61,14 @@ public class MainActivity extends AppCompatActivity {
 
         SwitchCompat switchCompat = findViewById(R.id.relaunchSwitch);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("relaunchState", Context.MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences("relaunchState", Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
         boolean isChecked = sharedPreferences.getBoolean("isRelaunch", false);
         switchCompat.setChecked(isChecked);
+
+        setTimerSpinner(isChecked);
+
+
         switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -67,8 +78,8 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     Toast.makeText(MainActivity.this, "Relaunch disabled ", Toast.LENGTH_SHORT).show();
                 }
-                SharedPreferences sharedPreferences1 = getSharedPreferences("relaunchState", Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences1.edit();
+                sharedPreferences = getSharedPreferences("relaunchState", Context.MODE_PRIVATE);
+
                 editor.putBoolean("isRelaunch", b);
                 editor.apply();
             }
@@ -102,6 +113,28 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+    private void setTimerSpinner(boolean isEnable){
+        if (isEnable){
+            spinner.setVisibility(View.VISIBLE);
+
+            ArrayAdapter<CharSequence> adapter1 = ArrayAdapter.createFromResource(
+                    this,
+                    R.array.relaunchArray,
+                    android.R.layout.simple_spinner_item);
+
+            adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinner.setAdapter(adapter1);
+            String time = spinner.getSelectedItem().toString();
+            editor.putString("RelaunchTimer", time);
+            editor.apply();
+
+        }
+        else {
+            spinner.setVisibility(View.GONE);
+        }
+    }
+
     private void requestOverlayPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,

@@ -32,11 +32,14 @@ public class AppLifeCycleObserver implements LifecycleObserver {
         //doRestart(context);
         SharedPreferences sharedPreferences = context.getSharedPreferences("relaunchState", Context.MODE_PRIVATE);
         boolean isChecked = sharedPreferences.getBoolean("isRelaunch", true);
+        String timer = sharedPreferences.getString("RelaunchTimer", "15");
+        int launchTime = Integer.parseInt(timer);
         if (isChecked){
+
             Log.d("MyApp","app is in background ");
             Log.d("MyApp","relaunch checked is enabled");
             WorkRequest relaunchRequest = new OneTimeWorkRequest.Builder(RelaunchWork.class)
-                    .setInitialDelay(15, TimeUnit.SECONDS)
+                    .setInitialDelay(launchTime, TimeUnit.SECONDS)
                     .addTag("relaunchWork")
                     .build();
 

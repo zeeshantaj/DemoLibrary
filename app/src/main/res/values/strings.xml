@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">Dialog</string>
+
+    <string-array name="relaunchArray">
+        <item>Select timer to relaunch</item>
+        <item>15 sec</item>
+        <item>20 sec</item>
+        <item>25 sec</item>
+        <item>30 sec</item>
+        <item>35 sec</item>
+        <item>40 sec</item>
+        <item>45 sec</item>
+        <item>50 sec</item>
+        <item>55 sec</item>
+        <item>60 sec</item>
+    </string-array>
+
 </resources>
