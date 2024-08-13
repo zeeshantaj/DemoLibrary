@@ -65,24 +65,20 @@ public class MainActivity extends AppCompatActivity {
         editor = sharedPreferences.edit();
         boolean isChecked = sharedPreferences.getBoolean("isRelaunch", false);
         switchCompat.setChecked(isChecked);
-
         setTimerSpinner(isChecked);
 
 
-        switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if (b){
-                    Toast.makeText(MainActivity.this, "Relaunch enabled ", Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    Toast.makeText(MainActivity.this, "Relaunch disabled ", Toast.LENGTH_SHORT).show();
-                }
-                sharedPreferences = getSharedPreferences("relaunchState", Context.MODE_PRIVATE);
-
-                editor.putBoolean("isRelaunch", b);
-                editor.apply();
+        switchCompat.setOnCheckedChangeListener((compoundButton, b) -> {
+            if (b){
+                Toast.makeText(MainActivity.this, "Relaunch enabled ", Toast.LENGTH_SHORT).show();
             }
+            else {
+                Toast.makeText(MainActivity.this, "Relaunch disabled ", Toast.LENGTH_SHORT).show();
+            }
+            sharedPreferences = getSharedPreferences("relaunchState", Context.MODE_PRIVATE);
+
+            editor.putBoolean("isRelaunch", b);
+            editor.apply();
         });
 
         Button startBtn = findViewById(R.id.startDownloadBtn);
