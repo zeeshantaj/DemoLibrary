@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         editor = sharedPreferences.edit();
         boolean isChecked = sharedPreferences.getBoolean("isRelaunch", false);
         switchCompat.setChecked(isChecked);
-        setTimerSpinner(isChecked);
+
 
 
         switchCompat.setOnCheckedChangeListener((compoundButton, b) -> {
@@ -75,8 +75,8 @@ public class MainActivity extends AppCompatActivity {
             else {
                 Toast.makeText(MainActivity.this, "Relaunch disabled ", Toast.LENGTH_SHORT).show();
             }
+            setTimerSpinner(b);
             sharedPreferences = getSharedPreferences("relaunchState", Context.MODE_PRIVATE);
-
             editor.putBoolean("isRelaunch", b);
             editor.apply();
         });
@@ -121,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
             adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner.setAdapter(adapter1);
+
             String time = spinner.getSelectedItem().toString();
             editor.putString("RelaunchTimer", time);
             editor.apply();

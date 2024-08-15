@@ -39,7 +39,7 @@ public class AppLifeCycleObserver implements LifecycleObserver {
             Log.d("MyApp","app is in background ");
             Log.d("MyApp","relaunch checked is enabled");
             WorkRequest relaunchRequest = new OneTimeWorkRequest.Builder(RelaunchWork.class)
-                    .setInitialDelay(launchTime, TimeUnit.SECONDS)
+                    .setInitialDelay(15, TimeUnit.SECONDS)
                     .addTag("relaunchWork")
                     .build();
 
