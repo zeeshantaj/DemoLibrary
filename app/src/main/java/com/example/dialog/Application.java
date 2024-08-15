@@ -17,7 +17,7 @@ public class Application extends android.app.Application {
         Log.d("MyApp","application class onCreate");
         // Register the lifecycle observer
 
-
+        // to call observer class for app lifecycle (to check if app is in background or in foreground)
         AppLifeCycleObserver observer = new AppLifeCycleObserver(this);
         ProcessLifecycleOwner.get().getLifecycle().addObserver(observer);
 

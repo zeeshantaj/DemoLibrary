@@ -38,11 +38,12 @@ public class AppLifeCycleObserver implements LifecycleObserver {
 
             Log.d("MyApp","app is in background ");
             Log.d("MyApp","relaunch checked is enabled");
+
+            // todo triggered worker class from the given time
             WorkRequest relaunchRequest = new OneTimeWorkRequest.Builder(RelaunchWork.class)
                     .setInitialDelay(15, TimeUnit.SECONDS)
                     .addTag("relaunchWork")
                     .build();
-
             WorkManager.getInstance(context).enqueue(relaunchRequest);
 
         }else {
@@ -51,6 +52,7 @@ public class AppLifeCycleObserver implements LifecycleObserver {
 
 
     }
+    // to stop the worker class when app return to foreground
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     public void onAppResume(){
         Log.d("MyApp","app is resume");

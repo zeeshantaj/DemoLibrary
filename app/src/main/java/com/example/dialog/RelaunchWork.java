@@ -35,10 +35,19 @@ public class RelaunchWork extends Worker {
 //
 
 
+        // call the service class in to when app in background to relaunch the app
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
             Intent serviceIntent = new Intent(getApplicationContext(), MyForegroundService.class);
             ContextCompat.startForegroundService(getApplicationContext(), serviceIntent);
 
+
+        }else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
+            // todo working in android 9
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.setComponent(new ComponentName("com.example.dialog","com.example.dialog.MainActivity"));
+            //intent.setComponent(new ComponentName(getPackageName(),MainActivity.class));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
         }
 
 //        else {
