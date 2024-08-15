@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
 //        String register = BuildConfig.BASE_URL;
 
         SwitchCompat switchCompat = findViewById(R.id.relaunchSwitch);
-
+        spinner = findViewById(R.id.relaunchTimerSpinner);
         sharedPreferences = getSharedPreferences("relaunchState", Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
         boolean isChecked = sharedPreferences.getBoolean("isRelaunch", false);
