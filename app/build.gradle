@@ -17,13 +17,10 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
-
     buildTypes {
-        debug{
-
-        }
         release {
+//            signingConfig signingConfigs.release
+//            checkForDevelopmentUrls
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -54,18 +51,9 @@ task checkForDevelopmentUrls {
         }
     }
 }
-// Conditionally apply the checkForDevelopmentUrls task only for release builds
-gradle.taskGraph.whenReady { taskGraph ->
-    def isReleaseBuild = taskGraph.hasTask(':app:assembleRelease') || taskGraph.hasTask(':app:bundleRelease')
 
-    if (isReleaseBuild) {
-        tasks.whenTaskAdded { task ->
-            if (task.name == 'preBuild') {
-                task.dependsOn checkForDevelopmentUrls
-            }
-        }
-    }
-}
+// Conditionally apply the checkForDevelopmentUrls task only for release builds
+
 dependencies {
 
     implementation project(path: ':DemoDialog')
