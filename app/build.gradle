@@ -18,7 +18,13 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+//        debug {
+//            buildConfigField "String", "BASE_URL", "\"https://jumbilin-bkd-development.azurewebsites.net/api/\""
+//        }
+
         release {
+          //  buildConfigField "String", "BASE_URL", "\"http://jumbilinapis0343434343.azurewebsites.net/api/v3/MenuBoard\""
+
 //            signingConfig signingConfigs.release
 //            checkForDevelopmentUrls
             minifyEnabled false

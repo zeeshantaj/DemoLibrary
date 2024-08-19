@@ -6,8 +6,9 @@ import com.example.dialog.BuildConfig;
 public class WebConst {
 
 //        // Development
-        public String BASE_URL = "https://jumbilin-bkd-development.azurewebsites.net/api/";
+        public static String BASE_URL = "https://jumbilin-bkd-development.azurewebsites.net/api/";
 
+        //public static final String BASE_URL = BuildConfig.BASE_URL;
 
     //    // Production
 //        public  String registerMenu = "http://jumbilinapis0343434343.azurewebsites.net/api/v3/MenuBoard";
