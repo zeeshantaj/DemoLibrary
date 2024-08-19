@@ -55,9 +55,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //String RegisterUrlNew = "";
-
-//        String register = BuildConfig.BASE_URL;
 
         SwitchCompat switchCompat = findViewById(R.id.relaunchSwitch);
         spinner = findViewById(R.id.relaunchTimerSpinner);
@@ -85,16 +82,11 @@ public class MainActivity extends AppCompatActivity {
         startBtn.setOnClickListener(view -> {
             loadData();
         });
-        WebConst webConst = new WebConst();
-        String url = webConst.BASE_URL;
         internetSpeedTextView = findViewById(R.id.speedTxt);
         startUpdatingInternetSpeed();
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE) != PackageManager.PERMISSION_GRANTED) {
-//                    if (Build.VERSION.SDK_INT >= 34) {
-//                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK}, REQUEST_CODE_FOREGROUND_SERVICE);
-//                    }
                     requestOverlayPermission();
 
                 }
