@@ -47,6 +47,7 @@ public class AppLifeCycleObserver implements LifecycleObserver {
             WorkManager.getInstance(context).enqueue(relaunchRequest);
 
         }else {
+
             Log.d("MyApp","relaunch checked is disabled ");
         }
 
