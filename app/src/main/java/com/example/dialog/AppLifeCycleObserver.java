@@ -30,9 +30,8 @@ public class AppLifeCycleObserver implements LifecycleObserver {
         // App goes to the background (or is closed)
 
         SharedPreferences sharedPreferences = context.getSharedPreferences("relaunchState", Context.MODE_PRIVATE);
-        boolean isChecked = sharedPreferences.getBoolean("isRelaunch", true);
-        String timer = sharedPreferences.getString("RelaunchTimer", "15");
-        int launchTime = Integer.parseInt(timer);
+        boolean isChecked = sharedPreferences.getBoolean("isRelaunch", false);
+
         if (isChecked){
 
             Log.d("MyApp","app is in background ");

@@ -115,7 +115,8 @@ public class MainActivity extends AppCompatActivity {
             spinner.setAdapter(adapter1);
 
             String time = spinner.getSelectedItem().toString();
-            editor.putString("RelaunchTimer", time);
+            int givenTime = Integer.parseInt(time);
+            editor.putInt("RelaunchTimer", givenTime);
             editor.apply();
 
         }
