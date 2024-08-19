@@ -19,14 +19,14 @@ android {
     }
     buildTypes {
         debug {
-         //   buildConfigField "boolean", "IS_SIGNED", "false"
+               buildConfigField "boolean", "IS_RELEASE", "false"
             buildConfigField "String", "BASE_URL", "\"https://jumbilin-bkd-development.azurewebsites.net/api/\""
 
         }
 
         release {
-          buildConfigField "String", "BASE_URL", "\"http://jumbilinapis0343434343.azurewebsites.net/api/v3/MenuBoard\""
-          //  buildConfigField "boolean", "IS_SIGNED", "true"
+            buildConfigField "String", "BASE_URL", "\"http://jumbilinapis0343434343.azurewebsites.net/api/v3/MenuBoard\""
+              buildConfigField "boolean", "IS_RELEASE", "true"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -36,21 +36,25 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-    // Define the task to check for development URLs
     // Define a custom task to check for development URLs
-    task checkForDevelopmentUrl {
-        doLast {
-            def baseUrl = android.defaultConfig.buildConfigField("BASE_URL").get("value")
-            if (baseUrl.contains("development")) {
-                throw new GradleException("BASE_URL contains 'development' in release build!")
-            }
-        }
-    }
+//    task checkForDevelopmentUrl {
+//        doLast {
+//            if (android.buildTypes.release.buildConfigField("String", "BASE_URL", "").value.contains("development")) {
+//                throw new GradleException("BASE_URL contains 'development' in release build!")
+//            }
+//        }
+    //}
 
-    // Ensure the custom task runs before the assembleRelease task
-    tasks.named("assembleRelease").configure {
-        dependsOn checkForDevelopmentUrl
-    }
+    // Dynamically configure task dependencies
+//    applicationVariants.all { variant ->
+//        if (variant.buildType.name == "release") {
+//            variant.outputs.each { output ->
+//                tasks.matching { it.name == "assemble${variant.name.capitalize()}" }.all {
+//                    dependsOn checkForDevelopmentUrl
+//                }
+//            }
+//        }
+//    }
 }
 // Hook the custom task into the release build process
 //preBuild.dependsOn checkReleaseUrl

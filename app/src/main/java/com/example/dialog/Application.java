@@ -20,6 +20,10 @@ public class Application extends android.app.Application {
         AppLifeCycleObserver observer = new AppLifeCycleObserver(this);
         ProcessLifecycleOwner.get().getLifecycle().addObserver(observer);
 
+        if (BuildConfig.IS_RELEASE && BuildConfig.BASE_URL.contains("development")) {
+            throw new IllegalStateException("BASE_URL contains 'development' in release build!");
+        }
+
 //        boolean IS_Debug = ( 0 != ( getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
 //
 //        if (IS_Debug){
