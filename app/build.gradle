@@ -18,47 +18,42 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
-//        debug {
-//            buildConfigField "String", "BASE_URL", "\"https://jumbilin-bkd-development.azurewebsites.net/api/\""
-//        }
+        debug {
+         //   buildConfigField "boolean", "IS_SIGNED", "false"
+            buildConfigField "String", "BASE_URL", "\"https://jumbilin-bkd-development.azurewebsites.net/api/\""
+
+        }
 
         release {
-          //  buildConfigField "String", "BASE_URL", "\"http://jumbilinapis0343434343.azurewebsites.net/api/v3/MenuBoard\""
-
-//            signingConfig signingConfigs.release
-//            checkForDevelopmentUrls
+          buildConfigField "String", "BASE_URL", "\"http://jumbilinapis0343434343.azurewebsites.net/api/v3/MenuBoard\""
+          //  buildConfigField "boolean", "IS_SIGNED", "true"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
     // Define the task to check for development URLs
-
-}
-task checkForDevelopmentUrls {
-    doLast {
-        // Define the path to your Java file
-        def javaFile = file("${projectDir}/src/main/java/com/example/dialog/WebConst.java")
-
-
-        if (!javaFile.exists()) {
-            throw new GradleException("The file WebConst.java does not exist!")
-        }
-
-        // Read the file content
-        def fileContent = javaFile.text
-
-        // Check for any URLs containing "development"
-        if (fileContent.contains("development")) {
-            throw new GradleException("Development URLs detected in WebConst.java! Please switch to production URLs before building the signed APK.")
+    // Define a custom task to check for development URLs
+    task checkForDevelopmentUrl {
+        doLast {
+            def baseUrl = android.defaultConfig.buildConfigField("BASE_URL").get("value")
+            if (baseUrl.contains("development")) {
+                throw new GradleException("BASE_URL contains 'development' in release build!")
+            }
         }
     }
-}
 
-// Conditionally apply the checkForDevelopmentUrls task only for release builds
+    // Ensure the custom task runs before the assembleRelease task
+    tasks.named("assembleRelease").configure {
+        dependsOn checkForDevelopmentUrl
+    }
+}
+// Hook the custom task into the release build process
+//preBuild.dependsOn checkReleaseUrl
 
 dependencies {
 
