@@ -8,8 +8,6 @@ public class WebConst {
 //      Development
         public static String BASE_URL = "https://jumbilin-bkd-development.azurewebsites.net/api/BuildConfig.";
 
-
 //        Production
-//        public  String registerMenu = "http://jumbilinapis0343434343.azurewebsites.net/api/v3/MenuBoard";
-
+//        public static String BASE_URL = "https://jumbilinapis0343434343.azurewebsites.net/api/";
 }

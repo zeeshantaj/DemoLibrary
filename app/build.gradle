@@ -17,16 +17,44 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+    task validateBaseUrl {
+        doLast {
+            // Path to the compiled WebConstants class in the build directory
+            def classesDir = file("${buildDir}/intermediates/javac/release/classes")
+            def classLoader = new URLClassLoader([classesDir.toURI().toURL()] as URL[])
+
+            try {
+                // Load the WebConstants class
+                def webConstantsClass = classLoader.loadClass("com.example.dialog.WebConst")
+
+                // Use reflection to get the BASE_URL field value
+                def baseUrl = webConstantsClass.getField("BASE_URL").get(null)
+
+                // Validate the URL
+                if (baseUrl.contains("development")) {
+                    throw new GradleException("BASE_URL contains 'development' in release build!")
+                } else if (!baseUrl.contains("jumbilinapis0343434343.azurewebsites.net/api/")) {
+                    throw new GradleException("BASE_URL is not set to the production URL in release build!")
+                }
+            } catch (Exception e) {
+                throw new GradleException("Error loading WebConstants class or accessing BASE_URL: ${e.message}")
+            }
+        }
+    }
+    android.applicationVariants.all { variant ->
+        if (variant.buildType.name == "release") {
+            variant.assembleProvider.configure {
+                dependsOn validateBaseUrl
+            }
+        }
+    }
     buildTypes {
         debug {
-               buildConfigField "boolean", "IS_RELEASE", "false"
             buildConfigField "String", "BASE_URL", "\"https://jumbilin-bkd-development.azurewebsites.net/api/\""
-
         }
 
         release {
-            buildConfigField "String", "BASE_URL", "\"http://jumbilinapis0343434343.azurewebsites.net/api/v3/MenuBoard\""
-              buildConfigField "boolean", "IS_RELEASE", "true"
+            buildConfigField "String", "BASE_URL", "\"https://jumbilinapis0343434343.azurewebsites.net/api/\""
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -36,25 +64,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-    // Define a custom task to check for development URLs
-//    task checkForDevelopmentUrl {
-//        doLast {
-//            if (android.buildTypes.release.buildConfigField("String", "BASE_URL", "").value.contains("development")) {
-//                throw new GradleException("BASE_URL contains 'development' in release build!")
-//            }
-//        }
-    //}
-
-    // Dynamically configure task dependencies
-//    applicationVariants.all { variant ->
-//        if (variant.buildType.name == "release") {
-//            variant.outputs.each { output ->
-//                tasks.matching { it.name == "assemble${variant.name.capitalize()}" }.all {
-//                    dependsOn checkForDevelopmentUrl
-//                }
-//            }
-//        }
-//    }
 }
 // Hook the custom task into the release build process
 //preBuild.dependsOn checkReleaseUrl
