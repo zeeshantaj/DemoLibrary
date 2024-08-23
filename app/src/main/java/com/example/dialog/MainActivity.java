@@ -101,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-
     private void setTimerSpinner(boolean isEnable){
         if (isEnable){
             spinner.setVisibility(View.VISIBLE);
