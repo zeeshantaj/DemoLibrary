@@ -113,12 +113,6 @@ public class MainActivity extends AppCompatActivity {
             adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner.setAdapter(adapter1);
 
-
-//            String time = spinner.getSelectedItem().toString();
-//            int givenTime = Integer.parseInt(time);
-//            editor.putInt("RelaunchTimer", givenTime);
-//            editor.apply();
-
         }
         else {
             spinner.setVisibility(View.GONE);
