@@ -63,8 +63,6 @@ public class MainActivity extends AppCompatActivity {
         boolean isChecked = sharedPreferences.getBoolean("isRelaunch", false);
         switchCompat.setChecked(isChecked);
 
-
-
         switchCompat.setOnCheckedChangeListener((compoundButton, b) -> {
             if (b){
                 Toast.makeText(MainActivity.this, "Relaunch enabled ", Toast.LENGTH_SHORT).show();
@@ -98,8 +96,6 @@ public class MainActivity extends AppCompatActivity {
                     requestOverlayPermission();
                 }
             }
-
-
     }
     private void setTimerSpinner(boolean isEnable){
         if (isEnable){
