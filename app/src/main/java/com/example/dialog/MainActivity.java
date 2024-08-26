@@ -109,10 +109,8 @@ public class MainActivity extends AppCompatActivity {
                     this,
                     R.array.relaunchArray,
                     android.R.layout.simple_spinner_item);
-
             adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner.setAdapter(adapter1);
-
         }
         else {
             spinner.setVisibility(View.GONE);
